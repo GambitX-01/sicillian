@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Wifi, WifiOff } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const tabs = [
   { label: "My matches",   href: "/learner/matches" },
@@ -13,6 +14,8 @@ const tabs = [
 
 export default function LearnerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const initials = user?.first_name ? user.first_name.slice(0, 2).toUpperCase() : "??";
 
   return (
     <div className="min-h-screen bg-[#f7f7f5]">
@@ -26,11 +29,11 @@ export default function LearnerLayout({ children }: { children: React.ReactNode 
                 className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
                 style={{ background: "linear-gradient(135deg, #34d399, #22d3ee)" }}
               >
-                AD
+                {initials}
               </div>
               <div>
-                <p className="font-semibold text-slate-900 text-sm leading-tight">Amahle Dlamini</p>
-                <p className="text-xs text-gray-400">IT Support · Nelson Mandela Bay</p>
+                <p className="font-semibold text-slate-900 text-sm leading-tight">{user?.first_name ?? "Learner"}</p>
+                <p className="text-xs text-gray-400">{user?.email}</p>
               </div>
             </div>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-300 text-amber-600 bg-amber-50 text-xs font-medium">
