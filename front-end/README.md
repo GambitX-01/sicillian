@@ -1,2 +1,0 @@
-# sicillian
-main project
