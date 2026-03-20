@@ -1,13 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from core.models import LearnerProfile, Opportunity 
+from core.models import LearnerProfile, Opportunity, institution
 from core.models import User
+
 
 
 # Create your models here.
 class User:
     ROLES_CHOICES = [
-        ('Leaner'),
+        ('Learner'),
         ('Employer'),
         ('Institution'),
         ('SETA')
@@ -23,15 +24,15 @@ class User:
     existing_emails = set()
 
 
-    class institution:
-      INSTITUTION_TYPE = [
-        ('university','University'),
-        ('tvet','TVET'),
-        ('training body','Training Body'),
+class Institution(models.Model):
+    INSTITUTION_TYPE = [
+        ('university', 'University'),
+        ('tvet', 'TVET'),
+        ('training_body', 'Training Body'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255,null = True, blank = True)
+    name = models.CharField(max_length=255, null=True, blank=True)
     type = models.CharField(max_length=20, choices=INSTITUTION_TYPE)
     district = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -40,26 +41,23 @@ class User:
         return self.name
 
 
-    class LearnerProfile:
-       STATUS_CHOICES = [
-        ('Searching'),
-        ('Placed'),
-        ('Training'),
+class LearnerProfile(models.Model):
+    STATUS_CHOICES = [
+        ('searching','Searching'),
+        ('placed','Placed'),
+        ('training','Training'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     institution = models.ForeignKey(
-        institution, on_delete=models.SET_NULL, null=True, blank=True
+        'Institution', on_delete=models.SET_NULL, null=True, blank=True
     )
     district = models.CharField(max_length=100)
     nqf_level = models.CharField(max_length=10)
     qualification = models.CharField(max_length=100)
-    skills = models.JSONField()  # ["linux", "networking"]
+    skills = models.JSONField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='searching')
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.user.username   
+    updated_at = models.DateTimeField(auto_now=True)   
 
 
 
