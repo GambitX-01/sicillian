@@ -1,37 +1,37 @@
-from models import User, Institution, LearnerProfile, Opportunity, Application, Match, GapAlert
 from rest_framework import serializers
+from .models import User, Institution, LearnerProfile, Opportunity, Application, Match, GapAlert
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email', 'password_hash', 'role', 'first_name', 'phone']
+        fields = ['id', 'email', 'password_hash', 'role', 'first_name', 'phone', 'created_at']
 
 class InstitutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Institution
-        fields = ['user', 'name', 'type', 'district']
+        fields = ['id', 'user', 'name', 'type', 'district', 'created_at']
 
 class LearnerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = LearnerProfile
-        fields = ['user', 'institution', 'district', 'nqf_level', 'qualification', 'skills', 'status']
+        fields = ['id', 'user', 'institution', 'district', 'nqf_level', 'qualification', 'skills', 'status', 'updated_at']
 
 class OpportunitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Opportunity
-        fields = ['institution', 'title', 'description', 'nqf_level', 'qualification', 'skills_required']
+        fields = ['id', 'employer', 'title', 'type', 'district', 'nqf_required', 'skills_required', 'stipend', 'spots_available', 'status', 'closes_at', 'created_at']
 
 class ApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
-        fields = ['learner', 'opportunity', 'status']
+        fields = ['id', 'learner', 'opportunity', 'status', 'channel', 'applied_at']
 
 class MatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Match
-        fields = ['learner', 'opportunity', 'match_score']
+        fields = ['id', 'learner', 'opportunity', 'fit_score', 'ai_reason', 'matched_at']
 
 class GapAlertSerializer(serializers.ModelSerializer):
     class Meta:
         model = GapAlert
-        fields = ['learner', 'gap_description', 'suggested_actions']
+        fields = ['id', 'district', 'alert_type', 'learners_ready', 'learners_placed', 'detail', 'status', 'created_at']
