@@ -1,27 +1,25 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-from core.models import LearnerProfile, Opportunity, Institution, Application, Match, GapAlert
-from core.models import User
-
-
 
 # Create your models here.
-class User:
+
+class User(models.Model):
     ROLES_CHOICES = [
-        ('Learner'),
-        ('Employer'),
-        ('Institution'),
-        ('SETA')
+        ('Learner', 'Learner'),
+        ('Employer', 'Employer'),
+        ('Institution', 'Institution'),
+        ('SETA', 'SETA')
     ]
 
-    email = models.CharField(max_length= 50, null = True, blank = True)
-    password_hash = models.CharField(max_length= 10,null = True, blank = True)
-    role = models.CharField(max_length= 20, CHOICES= ROLES_CHOICES)
-    first_name = models.CharField(max_length= 20,null = True, blank = True)
+    email = models.CharField(max_length=50, null=True, blank=True)
+    password_hash = models.CharField(max_length=100, null=True, blank=True)
+    role = models.CharField(max_length=20, choices=ROLES_CHOICES)
+    first_name = models.CharField(max_length=20, null=True, blank=True)
     phone = models.CharField(max_length=20)
 
-    created_at = models.DateTimeField(auto_now_add = True)
-    existing_emails = set()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.email} ({self.role})"
 
 
 class Institution(models.Model):
@@ -38,14 +36,14 @@ class Institution(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return self.name if self.name else f"Institution {self.id}"
 
 
 class LearnerProfile(models.Model):
     STATUS_CHOICES = [
-        ('searching','Searching'),
-        ('placed','Placed'),
-        ('training','Training'),
+        ('searching', 'Searching'),
+        ('placed', 'Placed'),
+        ('training', 'Training'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -59,6 +57,8 @@ class LearnerProfile(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='searching')
     updated_at = models.DateTimeField(auto_now=True)   
 
+    def __str__(self):
+        return f"Profile for {self.user.email}"
 
 
 class Opportunity(models.Model):
@@ -104,20 +104,24 @@ class Application(models.Model):
     ]
 
     learner = models.ForeignKey(LearnerProfile, on_delete=models.CASCADE)
-    opportunity = models.ForeignKey(opportunity, on_delete=models.CASCADE)
+    opportunity = models.ForeignKey(Opportunity, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     channel = models.CharField(max_length=10, choices=CHANNEL_CHOICES, default='app')
     applied_at = models.DateTimeField(auto_now_add=True)
 
 
-class Match:
+class Match(models.Model):
     learner = models.ForeignKey(LearnerProfile, on_delete=models.CASCADE)
     opportunity = models.ForeignKey(Opportunity, on_delete=models.CASCADE)
     fit_score = models.IntegerField()
     ai_reason = models.TextField()
     matched_at = models.DateTimeField(auto_now_add=True)
 
-class GapAlert:
+    class Meta:
+        verbose_name_plural = "Matches"
+
+
+class GapAlert(models.Model):
     ALERT_TYPE_CHOICES = [
         ('critical_gap', 'Critical Gap'),
         ('high_gap', 'High Gap'),
@@ -137,5 +141,3 @@ class GapAlert:
     detail = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
     created_at = models.DateTimeField(auto_now_add=True)    
-
-
