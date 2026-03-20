@@ -41,7 +41,7 @@ export default function Navbar() {
             <span className="text-white font-bold text-sm">SN</span>
           </div>
           <span className="text-white font-semibold text-lg tracking-tight">
-            Skills<span className="text-[#0D9488]">Nexus</span>
+            Skills<span className="text-[#0D9488]">Grid</span>
           </span>
         </a>
 
