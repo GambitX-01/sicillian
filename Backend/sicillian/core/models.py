@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from core.models import LearnerProfile, Opportunity 
+from core.models import User
+
+
 # Create your models here.
 class User:
     ROLES_CHOICES = [
@@ -9,25 +13,25 @@ class User:
         ('SETA')
     ]
 
-    email = models.CharField(max_length= 50, null=false, blank=false)
-    password_hash = models.CharField(max_length= 10, null=false, blank=false)
+    email = models.CharField(max_length= 50, null = True, blank = True)
+    password_hash = models.CharField(max_length= 10,null = True, blank = True)
     role = models.CharField(max_length= 20, CHOICES= ROLES_CHOICES)
-    first_name = models.CharField(max_length= 20, null=false, balnk=false)
-    phone = models.CharField(max_length=20, null=false, blank=false)
+    first_name = models.CharField(max_length= 20,null = True, blank = True)
+    phone = models.CharField(max_length=20)
 
-    created_at = models.DateTimeField(auto_now_add= true)
+    created_at = models.DateTimeField(auto_now_add = True)
     existing_emails = set()
 
 
     class institution:
       INSTITUTION_TYPE = [
-        ('University'),
-        ('TVET'),
-        ('Training Body'),
+        ('university','University'),
+        ('tvet','TVET'),
+        ('training body','Training Body'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255,null = True, blank = True)
     type = models.CharField(max_length=20, choices=INSTITUTION_TYPE)
     district = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -43,7 +47,7 @@ class User:
         ('Training'),
     ]
 
-    user = models.OneToOneField(user, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     institution = models.ForeignKey(
         institution, on_delete=models.SET_NULL, null=True, blank=True
     )
@@ -72,7 +76,7 @@ class opportunity(models.Model):
         ('filled', 'Filled'),
     ]
 
-    employer = models.ForeignKey(user, on_delete=models.CASCADE)
+    employer = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     type = models.CharField(max_length=20, choices=OPPORTUNITY_TYPE)
     district = models.CharField(max_length=100)
