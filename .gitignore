@@ -32,6 +32,10 @@ media/
 .DS_Store
 Thumbs.db
 
+# Docs
+doc/
+docs/
+
 # IDE
 .vscode/
 .idea/
