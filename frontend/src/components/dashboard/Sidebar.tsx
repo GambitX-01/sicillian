@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
-type Role = "learner" | "employer" | "institution" | "seta" | "incubator" | "superadmin";
+type Role = "learner" | "employer" | "institution" | "seta" | "incubator";
 
 interface NavItem {
   label: string;
@@ -54,12 +54,6 @@ const NAV_CONFIG: Record<Role, NavItem[]> = {
     { label: "Programmes",    href: "/incubator/programmes",    icon: Layers },
     { label: "Mentors",       href: "/incubator/mentors",       icon: Users },
     { label: "Notifications", href: "/incubator/notifications", icon: Bell },
-  ],
-  superadmin: [
-    { label: "Dashboard",     href: "/superadmin/dashboard",    icon: LayoutDashboard },
-    { label: "Users",         href: "/superadmin/users",        icon: Users },
-    { label: "Organisations", href: "/superadmin/organisations",icon: Briefcase },
-    { label: "Notifications", href: "/superadmin/notifications",icon: Bell },
   ],
 };
 
