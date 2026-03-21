@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
@@ -37,6 +37,11 @@ export default function LoginPage() {
     >
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
+      <Link href="/" className="absolute top-4 left-4 flex items-center gap-1.5 text-slate-400 hover:text-white text-sm transition-colors">
+        <ArrowLeft size={16} />
+        Home
+      </Link>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
