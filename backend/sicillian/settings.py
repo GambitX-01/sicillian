@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-^#u%05zmwf#b%dfue*a$@eha4@yyjvk&qm^vy8w^1ob4vi&v1m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["https://sicillian-2.onrender.com", "http://localhost:3000", "https://sicillian.vercel.app"]
 
 
 # Application definition
