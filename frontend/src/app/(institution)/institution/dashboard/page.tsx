@@ -1,103 +1,114 @@
 "use client";
 
-import { ArrowUpRight, Loader2 } from "lucide-react";
-import { useApi } from "@/hooks/useApi";
-import { useAuth } from "@/context/AuthContext";
-import type { LearnerProfile, Match } from "@/types";
+import { useState } from "react";
+import { ArrowUpRight, SlidersHorizontal } from "lucide-react";
+
+// ── Demo data ───────────────────────────────────────────────────────────────
+
+const DEMO_LEARNERS = [
+  { id: 1,  name: "Vuyo Mkhize",    initials: "VM", qualification: "BSc Information Technology",  nqf: "6", district: "Nelson Mandela Bay", status: "searching", skills: ["Python","SQL","Django","Excel","Git"]         },
+  { id: 2,  name: "Thabo Mokoena", initials: "TM", qualification: "BSc Computer Science",         nqf: "6", district: "Nelson Mandela Bay", status: "placed",    skills: ["Python","SQL","Django","Git"]                  },
+  { id: 3,  name: "Naledi Dlamini",initials: "ND", qualification: "National Diploma IT",          nqf: "5", district: "Nelson Mandela Bay", status: "placed",    skills: ["SQL","Excel","Data Analysis","Power BI"]       },
+  { id: 4,  name: "Sipho Ndlovu",  initials: "SN", qualification: "NCV IT",                       nqf: "4", district: "Buffalo City",        status: "searching", skills: ["Networking","Windows","Hardware"]              },
+  { id: 5,  name: "Aisha Petersen",initials: "AP", qualification: "BSc Information Technology",  nqf: "6", district: "Nelson Mandela Bay", status: "placed",    skills: ["React","TypeScript","Node.js"]                 },
+  { id: 6,  name: "Lebo Sithole",  initials: "LS", qualification: "ND Business Analysis",        nqf: "5", district: "East London",          status: "placed",    skills: ["SQL","Excel","Power BI","Tableau"]            },
+  { id: 7,  name: "Zola Mfeka",    initials: "ZM", qualification: "NCV Electrical Engineering",  nqf: "4", district: "Buffalo City",         status: "searching", skills: ["AutoCAD","Wiring","Safety"]                   },
+  { id: 8,  name: "Kwame Boateng", initials: "KB", qualification: "BSc Computer Science",        nqf: "6", district: "Nelson Mandela Bay",  status: "searching", skills: ["Java","Python","Algorithms"]                  },
+  { id: 9,  name: "Yolanda Adams", initials: "YA", qualification: "National Diploma IT",         nqf: "5", district: "Nelson Mandela Bay",  status: "placed",    skills: ["SQL","Excel","Data Analysis"]                 },
+  { id: 10, name: "Rethabile Moea",initials: "RM", qualification: "National Diploma IT",         nqf: "5", district: "East London",          status: "searching", skills: ["Linux","Networking","Python"]                 },
+];
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
 
 function placementColor(pct: number) {
   if (pct >= 70) return "text-emerald-700";
-  if (pct >= 55) return "text-amber-600";
+  if (pct >= 45) return "text-amber-600";
   return "text-red-500";
 }
-
 function barColor(pct: number) {
-  if (pct >= 70) return "bg-emerald-400";
-  if (pct >= 55) return "bg-amber-400";
-  return "bg-red-400";
+  if (pct >= 70) return "from-emerald-400 to-cyan-400";
+  if (pct >= 45) return "from-amber-400 to-orange-300";
+  return "from-red-400 to-rose-300";
 }
 
+function Pills({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex flex-wrap gap-1">
+      {options.map(o => (
+        <button key={o} onClick={() => onChange(o)}
+          className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+            value === o ? "border-emerald-400 text-emerald-700 bg-emerald-50" : "border-gray-200 text-gray-500 bg-white hover:border-gray-300"
+          }`}
+        >{o}</button>
+      ))}
+    </div>
+  );
+}
+
+// ── Page ────────────────────────────────────────────────────────────────────
+
 export default function InstitutionDashboard() {
-  const { user } = useAuth();
-  const { data: profiles, loading: lProfiles } = useApi<LearnerProfile[]>("/learner-profiles/");
-  const { data: matches,  loading: lMatches  } = useApi<Match[]>("/matches/");
+  // Programme filters
+  const [nqfFilter,    setNqfFilter]    = useState("All");
+  const [progSort,     setProgSort]     = useState("Placement %");
 
-  const loading = lProfiles || lMatches;
+  // Learner filters
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [nqfL,         setNqfL]         = useState("All");
+  const [districtFilter, setDistrictFilter] = useState("All");
 
-  // Filter to learners from this institution
-  const myLearners = (profiles ?? []).filter(p => p.institution === user?.id);
+  // ── Stats ─────────────────────────────────────────────────────────────
+  const total    = DEMO_LEARNERS.length;
+  const placed   = DEMO_LEARNERS.filter(l => l.status === "placed").length;
+  const searching = total - placed;
+  const placementRate = Math.round((placed / total) * 100);
 
-  const totalLearners  = myLearners.length;
-  const placedLearners = myLearners.filter(p => p.status === "placed").length;
-  const searchingLearners = myLearners.filter(p => p.status === "searching").length;
-
-  const learnerIds = new Set(myLearners.map(p => p.user));
-  const matchedLearnerCount = new Set(
-    (matches ?? []).filter(m => learnerIds.has(m.learner)).map(m => m.learner)
-  ).size;
-
-  const placementRate = totalLearners > 0 ? Math.round((placedLearners / totalLearners) * 100) : 0;
-
-  // Group by qualification for programme breakdown
+  // ── Programme outcomes ────────────────────────────────────────────────
   const qualMap = new Map<string, { count: number; placed: number; nqf: string }>();
-  for (const p of myLearners) {
-    const prev = qualMap.get(p.qualification) ?? { count: 0, placed: 0, nqf: p.nqf_level };
-    qualMap.set(p.qualification, {
-      count:  prev.count + 1,
-      placed: prev.placed + (p.status === "placed" ? 1 : 0),
-      nqf:    prev.nqf,
-    });
+  for (const l of DEMO_LEARNERS) {
+    const prev = qualMap.get(l.qualification) ?? { count: 0, placed: 0, nqf: l.nqf };
+    qualMap.set(l.qualification, { count: prev.count + 1, placed: prev.placed + (l.status === "placed" ? 1 : 0), nqf: prev.nqf });
   }
-  const programmes = [...qualMap.entries()]
-    .map(([name, d]) => ({
-      name,
-      nqf: `NQF ${d.nqf}`,
-      count: d.count,
-      placementPct: d.count > 0 ? Math.round((d.placed / d.count) * 100) : 0,
-    }))
-    .sort((a, b) => b.count - a.count);
+  let programmes = [...qualMap.entries()].map(([name, d]) => ({
+    name, nqf: d.nqf,
+    count: d.count,
+    placementPct: Math.round((d.placed / d.count) * 100),
+  }));
+  if (nqfFilter !== "All") programmes = programmes.filter(p => p.nqf === nqfFilter);
+  programmes = programmes.sort((a, b) =>
+    progSort === "Placement %" ? b.placementPct - a.placementPct : b.count - a.count
+  );
 
-  const orgName = user?.first_name ?? "Your Institution";
+  // ── Learner table ─────────────────────────────────────────────────────
+  const districts = ["All", ...Array.from(new Set(DEMO_LEARNERS.map(l => l.district))).sort()];
+  let learners = DEMO_LEARNERS as typeof DEMO_LEARNERS;
+  if (statusFilter !== "All")   learners = learners.filter(l => l.status === statusFilter);
+  if (nqfL !== "All")           learners = learners.filter(l => l.nqf === nqfL);
+  if (districtFilter !== "All") learners = learners.filter(l => l.district === districtFilter);
 
   return (
     <div className="bg-[#f7f7f5] min-h-screen p-6 space-y-5">
       {/* Heading */}
       <div className="border-b border-gray-200 pb-4">
-        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">{orgName}</p>
+        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">NMU — Eastern Cape</p>
         <h1 className="text-xl font-bold text-slate-900">Institution Dashboard</h1>
         <p className="text-sm text-gray-400 mt-0.5">Graduate pipeline and employment outcomes overview</p>
       </div>
 
-      {/* Stats strip */}
+      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-gray-200 rounded overflow-hidden">
-        <div className="bg-white px-4 py-3">
-          <p className="text-xs text-gray-400 mb-1">Learners on Platform</p>
-          <p className="text-2xl font-bold text-slate-900 leading-none mb-1">
-            {loading ? "—" : totalLearners}
-          </p>
-          <p className="text-xs text-gray-400">registered</p>
-        </div>
-        <div className="bg-white px-4 py-3">
-          <p className="text-xs text-gray-400 mb-1">Placement Rate</p>
-          <p className="text-2xl font-bold text-slate-900 leading-none mb-1">
-            {loading ? "—" : totalLearners > 0 ? `${placementRate}%` : "—"}
-          </p>
-          <p className="text-xs text-gray-400">{placedLearners} placed</p>
-        </div>
-        <div className="bg-white px-4 py-3">
-          <p className="text-xs text-gray-400 mb-1">AI Matched</p>
-          <p className="text-2xl font-bold text-slate-900 leading-none mb-1">
-            {loading ? "—" : matchedLearnerCount}
-          </p>
-          <p className="text-xs text-gray-400">in pipeline now</p>
-        </div>
-        <div className="bg-white px-4 py-3">
-          <p className="text-xs text-gray-400 mb-1">Searching</p>
-          <p className="text-2xl font-bold text-slate-900 leading-none mb-1">
-            {loading ? "—" : searchingLearners}
-          </p>
-          <p className="text-xs text-gray-400">active job seekers</p>
-        </div>
+        {[
+          { label: "Learners on Platform", val: total,            sub: "registered" },
+          { label: "Placement Rate",        val: `${placementRate}%`, sub: `${placed} placed` },
+          { label: "AI Matched",            val: 9,               sub: "in pipeline now" },
+          { label: "Searching",             val: searching,       sub: "active job seekers" },
+        ].map(({ label, val, sub }) => (
+          <div key={label} className="bg-white px-4 py-3">
+            <p className="text-xs text-gray-400 mb-1">{label}</p>
+            <p className="text-2xl font-bold text-slate-900 leading-none mb-1">{val}</p>
+            <p className="text-xs text-gray-400">{sub}</p>
+          </div>
+        ))}
       </div>
 
       {/* Programme outcomes */}
@@ -108,54 +119,103 @@ export default function InstitutionDashboard() {
             All learners <ArrowUpRight size={11} />
           </a>
         </div>
-        {lProfiles ? (
-          <div className="flex items-center justify-center py-10 text-slate-400 gap-2">
-            <Loader2 size={16} className="animate-spin" /> Loading…
+        {/* Filters */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5 border-b border-gray-100 bg-gray-50">
+          <SlidersHorizontal size={13} className="text-gray-400 shrink-0" />
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400">NQF:</span>
+            <Pills options={["All", "4", "5", "6"]} value={nqfFilter} onChange={setNqfFilter} />
           </div>
-        ) : programmes.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-8">
-            No learners linked to your institution yet.
-          </p>
-        ) : (
-          <div className="divide-y divide-gray-50">
-            {programmes.map((p) => (
-              <div key={p.name} className="flex items-center justify-between px-4 py-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900">{p.name}</p>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-200">{p.nqf}</span>
-                    <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-200">{p.count} learner{p.count !== 1 ? "s" : ""}</span>
-                  </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400">Sort:</span>
+            <Pills options={["Placement %", "Learner count"]} value={progSort} onChange={setProgSort} />
+          </div>
+        </div>
+
+        <div className="divide-y divide-gray-50">
+          {programmes.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">No programmes match this filter.</p>
+          ) : programmes.map(p => (
+            <div key={p.name} className="flex items-center justify-between px-4 py-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-900">{p.name}</p>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-200">NQF {p.nqf}</span>
+                  <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-200">{p.count} learner{p.count !== 1 ? "s" : ""}</span>
                 </div>
-                <div className="flex items-center gap-4 ml-4 shrink-0">
-                  <div className="text-right">
-                    <p className={`text-lg font-bold ${placementColor(p.placementPct)}`}>{p.placementPct}%</p>
-                    <p className="text-xs text-gray-400">placed</p>
-                  </div>
-                  <div className="w-24">
-                    <div className="h-1.5 bg-gray-100 rounded overflow-hidden">
-                      <div
-                        className={`h-full rounded ${barColor(p.placementPct)}`}
-                        style={{ width: `${p.placementPct}%` }}
-                      />
-                    </div>
+              </div>
+              <div className="flex items-center gap-4 ml-4 shrink-0">
+                <div className="text-right">
+                  <p className={`text-lg font-bold ${placementColor(p.placementPct)}`}>{p.placementPct}%</p>
+                  <p className="text-xs text-gray-400">placed</p>
+                </div>
+                <div className="w-24">
+                  <div className="h-1.5 bg-gray-100 rounded overflow-hidden">
+                    <div className={`h-full rounded bg-gradient-to-r ${barColor(p.placementPct)}`} style={{ width: `${p.placementPct}%` }} />
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Quick actions */}
-      {totalLearners === 0 && !loading && (
-        <div className="bg-white border border-gray-200 rounded px-4 py-6 text-center space-y-2">
-          <p className="text-sm font-semibold text-slate-700">No learners linked yet</p>
-          <p className="text-xs text-slate-400">
-            Learners can select your institution when they register. Their profiles will appear here.
-          </p>
+      {/* Learner table */}
+      <div className="bg-white border border-gray-200 rounded">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <p className="text-sm font-semibold text-slate-900">Learners</p>
+          <span className="text-xs text-gray-400">{learners.length} shown</span>
         </div>
-      )}
+        {/* Filters */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5 border-b border-gray-100 bg-gray-50">
+          <SlidersHorizontal size={13} className="text-gray-400 shrink-0" />
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400">Status:</span>
+            <Pills options={["All", "searching", "placed"]} value={statusFilter} onChange={setStatusFilter} />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400">NQF:</span>
+            <Pills options={["All", "4", "5", "6"]} value={nqfL} onChange={setNqfL} />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400">District:</span>
+            <Pills options={districts} value={districtFilter} onChange={setDistrictFilter} />
+          </div>
+        </div>
+
+        <div className="divide-y divide-gray-50">
+          {learners.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">No learners match these filters.</p>
+          ) : learners.map(l => (
+            <div key={l.id} className="flex items-center justify-between px-4 py-2.5">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-slate-900 shrink-0"
+                  style={{ background: "linear-gradient(135deg,#34d399,#22d3ee)" }}
+                >
+                  {l.initials}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-900">{l.name}</p>
+                  <p className="text-xs text-gray-400">{l.qualification} · NQF {l.nqf} · {l.district}</p>
+                  <div className="flex flex-wrap gap-1 mt-0.5">
+                    {l.skills.slice(0, 3).map(s => (
+                      <span key={s} className="text-[10px] px-1.5 rounded bg-gray-100 text-gray-500 border border-gray-200">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                l.status === "placed"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  : "bg-amber-50 text-amber-700 border-amber-200"
+              }`}>
+                {l.status.charAt(0).toUpperCase() + l.status.slice(1)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

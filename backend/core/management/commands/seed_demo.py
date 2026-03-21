@@ -126,6 +126,15 @@ class Command(BaseCommand):
                 qualification='NCV IT',
                 skills=['Networking', 'Windows', 'Hardware', 'CompTIA A+'],
             ),
+            dict(
+                email='vuyo@demo.co.za',
+                first_name='Vuyo Mkhize',
+                phone='0821234567',
+                district='Nelson Mandela Bay',
+                nqf_level='6',
+                qualification='BSc Information Technology',
+                skills=['Python', 'SQL', 'Django', 'Data Analysis', 'Excel', 'Git'],
+            ),
         ]
 
         for ld in learners_data:
@@ -189,5 +198,6 @@ class Command(BaseCommand):
             f'  Learner 1:  thabo@demo.co.za   (NQF 6, Python/SQL/Django)\n'
             f'  Learner 2:  naledi@demo.co.za  (NQF 5, SQL/Excel/Data)\n'
             f'  Learner 3:  sipho@demo.co.za   (NQF 4, Networking/IT)\n'
+            f'  DEMO USER:  vuyo@demo.co.za    (NQF 6, Python/SQL/Django/Data) [USE FOR JUDGES]\n'
             f'  Employer:   employer@demo.co.za\n'
         ))

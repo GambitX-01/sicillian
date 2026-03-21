@@ -14,18 +14,26 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   };
 
   const res = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
-  const data = await res.json();
+  const isJson = res.headers.get('content-type')?.includes('application/json');
 
   if (!res.ok) {
-    const message =
-      data?.detail ||
-      data?.non_field_errors?.[0] ||
-      Object.values(data as Record<string, string[]>)?.[0]?.[0] ||
-      'Request failed';
-    throw new Error(message);
+    if (isJson) {
+      const data = await res.json();
+      const message =
+        data?.detail ||
+        data?.non_field_errors?.[0] ||
+        Object.values(data as Record<string, string[]>)?.[0]?.[0] ||
+        'Request failed';
+      throw new Error(message);
+    }
+    throw new Error(`Server error ${res.status}: ${res.statusText || 'unexpected response'}`);
   }
 
-  return data as T;
+  if (!isJson) {
+    throw new Error(`Expected JSON but got ${res.headers.get('content-type') ?? 'unknown content type'}`);
+  }
+
+  return res.json() as Promise<T>;
 }
 
 export const api = {
