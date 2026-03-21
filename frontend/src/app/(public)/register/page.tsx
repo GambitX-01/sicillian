@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Mail, Lock, User, GraduationCap, Briefcase, BookOpen, ShieldCheck, Layers } from "lucide-react";
+import { Mail, Lock, User, GraduationCap, Briefcase, BookOpen, ShieldCheck, Layers, Phone } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 type RoleOption = {
@@ -26,6 +26,9 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("")
+  const [qualification,setQualification ] = useState("");
+  const [fieldOfStudy,setFieldOfStudy] = useState("")
 
   return (
     <div
@@ -45,22 +48,46 @@ export default function RegisterPage() {
         className="w-full max-w-xl"
       >
         {/* Logo */}
-        <div className="text-center mb-8">
-          <span
-            className="text-3xl font-bold tracking-tight"
-            style={{
-              background: "linear-gradient(90deg, #34d399, #22d3ee)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            SkillsGrid
-          </span>
-          <p className="text-slate-400 text-sm mt-2">Create your account</p>
-        </div>
+        
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 rounded flex justify-center items-center mx-auto mt-4">
+              <img src="TransparentLOgo.png" alt="LOGO" className="object-contain w-70 h-70" />
+            </div>
+            <p className="text-slate-400 text-sm mt-2">Create your account</p>
+          </div>
 
         <div className="bg-slate-800 border border-slate-700 rounded-sm p-8">
           <h2 className="text-xl font-semibold text-white mb-6">Get started</h2>
+
+            {/* Role selector */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">I am a...</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {roles.map((role) => {
+                  const Icon = role.icon;
+                  const isSelected = selectedRole === role.id;
+                  return (
+                    <button
+                      key={role.id}
+                      type="button"
+                      onClick={() => setSelectedRole(role.id)}
+                      className="flex flex-col items-center gap-2 p-3 rounded-sm border text-center transition-all duration-150"
+                      style={
+                        isSelected
+                          ? { border: "1.5px solid #34d399", background: "rgba(52,211,153,0.08)" }
+                          : { border: "1.5px solid #334155", background: "transparent" }
+                      }
+                    >
+                      <Icon size={20} className={isSelected ? "text-emerald-400" : "text-slate-500"} />
+                      <span className={`text-xs font-semibold ${isSelected ? "text-emerald-400" : "text-slate-300"}`}>
+                        {role.label}
+                      </span>
+                      <span className="text-[10px] text-slate-500 leading-tight">{role.description}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
           <div className="space-y-4">
             {/* Name */}
@@ -73,6 +100,21 @@ export default function RegisterPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your full name"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
+                />
+              </div>
+            </div>
+            
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Phone</label>
+              <div className="relative">
+                <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Number"
                   className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
                 />
               </div>
@@ -106,37 +148,60 @@ export default function RegisterPage() {
                   className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
                 />
               </div>
-            </div>
 
-            {/* Role selector */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">I am a...</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {roles.map((role) => {
-                  const Icon = role.icon;
-                  const isSelected = selectedRole === role.id;
-                  return (
-                    <button
-                      key={role.id}
-                      type="button"
-                      onClick={() => setSelectedRole(role.id)}
-                      className="flex flex-col items-center gap-2 p-3 rounded-sm border text-center transition-all duration-150"
-                      style={
-                        isSelected
-                          ? { border: "1.5px solid #34d399", background: "rgba(52,211,153,0.08)" }
-                          : { border: "1.5px solid #334155", background: "transparent" }
-                      }
-                    >
-                      <Icon size={20} className={isSelected ? "text-emerald-400" : "text-slate-500"} />
-                      <span className={`text-xs font-semibold ${isSelected ? "text-emerald-400" : "text-slate-300"}`}>
-                        {role.label}
-                      </span>
-                      <span className="text-[10px] text-slate-500 leading-tight">{role.description}</span>
-                    </button>
-                  );
-                })}
-              </div>
             </div>
+            {/* Learner Fields */}
+            {selectedRole === "learner" && (
+              <>
+                {/* NQFQ Level */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">NQF Level</label>
+                  <div className="relative">
+                    <GraduationCap size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="NQF Level"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
+                    />
+                  </div>
+                </div>
+                
+                {/* Institution */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Institution</label>
+                  <div className="relative">
+                    
+                  <select className="bg-slate-800 text-white border border-slate-700 px-4 py-2 rounded-md focus:outline-none focus:border-emerald-400">
+                    <option value=""><GraduationCap size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />Select your Institution</option>
+                    <option value="institution_1">NMU Nelson Mandela University</option>
+                    <option value="institution_2">PE TVET college</option>
+                    <option value="institution_3">WSU</option>
+                  </select>
+                  </div>
+                </div>
+                
+                {/* Skills */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Skills</label>
+                  <div className="relative">
+                    <GraduationCap size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Skills"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
+                    />
+                  </div>
+                </div>
+                
+                
+
+              </>
+            )}
+
 
             {/* Submit */}
             <button

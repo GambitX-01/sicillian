@@ -43,8 +43,8 @@ export default function Navbar() {
             <div className="w-1 h-1.5 bg-[#67e8f9] rounded-full" />
             <div className="w-1 h-1.5 bg-[#22d3ee] rounded-full" />
           </div>
-          <div className="w-8 h-8 rounded bg-[#34d399] flex items-center justify-center border border-[#67e8f9]/30">
-            <span className="text-white font-bold text-sm">SG</span>
+          <div className="w-8 h-8 rounded bg-[#FFF] flex items-center justify-center border border-[#67e8f9]/30">
+            <img src="TransparentLOgo.png" alt="LOGO"/> 
           </div>
           <span className="text-white font-semibold text-lg tracking-tight">
             Skills<span className="text-[#67e8f9]">Grid</span>
