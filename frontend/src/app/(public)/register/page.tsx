@@ -2,41 +2,41 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, User, Phone, GraduationCap, Briefcase, BookOpen, ShieldCheck, Layers, ChevronLeft } from "lucide-react";
+import { motion } from "framer-motion";
+import { Mail, Lock, User, GraduationCap, Briefcase, BookOpen, ShieldCheck, Layers, Phone } from "lucide-react";
 import { LucideIcon } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import type { OrgType } from "@/types";
 
-type RoleOption = { id: string; label: string; description: string; icon: LucideIcon };
+type RoleOption = {
+  id: string;
+  label: string;
+  description: string;
+  icon: LucideIcon;
+};
 
 const roles: RoleOption[] = [
-  { id: "learner",     label: "Learner",     description: "Find opportunities & matches", icon: GraduationCap },
-  { id: "employer",    label: "Employer",    description: "Post jobs & find talent",       icon: Briefcase },
-  { id: "institution", label: "Institution", description: "Manage programmes & learners",  icon: BookOpen },
-  { id: "seta",        label: "SETA",        description: "Oversee skills development",    icon: ShieldCheck },
-  { id: "incubator",   label: "Incubator",   description: "Support entrepreneurs",         icon: Layers },
+  { id: "learner", label: "Learner", description: "Find opportunities & matches", icon: GraduationCap },
+  { id: "employer", label: "Employer", description: "Post jobs & find talent", icon: Briefcase },
+  { id: "institution", label: "Institution", description: "Manage programmes & learners", icon: BookOpen },
+  { id: "seta", label: "SETA", description: "Oversee skills development", icon: ShieldCheck },
+  { id: "incubator", label: "Incubator", description: "Support entrepreneurs", icon: Layers },
 ];
 
-const NQF_LEVELS = ["1","2","3","4","5","6","7","8","9","10"];
-const DISTRICTS = ["Nelson Mandela Bay","Buffalo City","Amathole","Chris Hani","Joe Gqabi","OR Tambo","Alfred Nzo","Cacadu/Sarah Baartman"];
-
 export default function RegisterPage() {
-  const { registerLearner, registerOrg } = useAuth();
-  const router = useRouter();
-
-  // Step 1 fields
-  const [step, setStep] = useState<1 | 2>(1);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
-  const [firstName, setFirstName] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("")
+  const [qualification,setQualification ] = useState("");
+  const [fieldOfStudy,setFieldOfStudy] = useState("")
 
   return (
     <div
       className="min-h-screen bg-slate-900 flex items-center justify-center px-4 py-10 relative overflow-hidden"
-      style={{ backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)`, backgroundSize: "32px 32px" }}
+      style={{
+        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)`,
+        backgroundSize: "32px 32px",
+      }}
     >
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -48,63 +48,16 @@ export default function RegisterPage() {
         className="w-full max-w-xl"
       >
         {/* Logo */}
-        <div className="text-center mb-8">
-          <span
-            className="text-3xl font-bold tracking-tight"
-            style={{
-              background: "linear-gradient(90deg, #34d399, #22d3ee)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            SkillsGrid
-          </span>
-          <p className="text-slate-400 text-sm mt-2">Create your account</p>
-        </div>
+        
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 rounded flex justify-center items-center mx-auto mt-4">
+              <img src="TransparentLOgo.png" alt="LOGO" className="object-contain w-70 h-70" />
+            </div>
+            <p className="text-slate-400 text-sm mt-2">Create your account</p>
+          </div>
 
         <div className="bg-slate-800 border border-slate-700 rounded-sm p-8">
           <h2 className="text-xl font-semibold text-white mb-6">Get started</h2>
-
-          <div className="space-y-4">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Full name</label>
-              <div className="relative">
-                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your full name"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
-                />
-              </div>
-            </div>
-
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Email address</label>
-                  <div className="relative">
-                    <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required
-                      className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors" />
-                  </div>
-                </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
-              <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
-                />
-              </div>
-            </div>
 
             {/* Role selector */}
             <div>
@@ -136,117 +89,134 @@ export default function RegisterPage() {
               </div>
             </div>
 
-                {error && <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-sm px-3 py-2">{error}</p>}
+          <div className="space-y-4">
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Full name</label>
+              <div className="relative">
+                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your full name"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
+                />
+              </div>
+            </div>
+            
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Phone</label>
+              <div className="relative">
+                <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Number"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
+                />
+              </div>
+            </div>
 
-                <button type="submit" className="w-full py-2.5 rounded-sm text-sm font-semibold text-slate-900 mt-2 transition-opacity hover:opacity-90"
-                  style={{ background: "linear-gradient(90deg, #34d399, #22d3ee)" }}>
-                  Next
-                </button>
-              </motion.form>
-            ) : (
-              <motion.form key="step2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} onSubmit={handleSubmit} className="space-y-4">
-                <h2 className="text-xl font-semibold text-white mb-4">
-                  {selectedRole === "learner" ? "Your profile" : "Organisation details"}
-                </h2>
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Email address</label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
+                />
+              </div>
+            </div>
 
-                {/* Phone — both */}
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
+                />
+              </div>
+
+            </div>
+            {/* Learner Fields */}
+            {selectedRole === "learner" && (
+              <>
+                {/* NQFQ Level */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Phone number</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">NQF Level</label>
                   <div className="relative">
-                    <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+27 xx xxx xxxx" required
-                      className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors" />
+                    <GraduationCap size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="NQF Level"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
+                    />
                   </div>
                 </div>
+                
+                {/* Institution */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Institution</label>
+                  <div className="relative">
+                    
+                  <select className="bg-slate-800 text-white border border-slate-700 px-4 py-2 rounded-md focus:outline-none focus:border-emerald-400">
+                    <option value=""><GraduationCap size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />Institution</option>
+                    <option value="institution_1">NMU Nelson Mandela University</option>
+                    <option value="institution_2">PE TVET college</option>
+                    <option value="institution_3">WSU</option>
+                  </select>
+                  </div>
+                </div>
+                
+                {/* Skills */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Skills</label>
+                  <div className="relative">
+                    <GraduationCap size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Skills"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-sm pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors"
+                    />
+                  </div>
+                </div>
+                
+                
 
-                {selectedRole === "learner" ? (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">District</label>
-                      <select value={district} onChange={e => setDistrict(e.target.value)} required
-                        className="w-full bg-slate-900 border border-slate-700 rounded-sm px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
-                        <option value="">Select district</option>
-                        {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">NQF Level</label>
-                      <select value={nqfLevel} onChange={e => setNqfLevel(e.target.value)} required
-                        className="w-full bg-slate-900 border border-slate-700 rounded-sm px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
-                        <option value="">Select NQF level</option>
-                        {NQF_LEVELS.map(l => <option key={l} value={l}>NQF {l}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">Qualification</label>
-                      <input type="text" value={qualification} onChange={e => setQualification(e.target.value)} placeholder="e.g. National Diploma in IT" required
-                        className="w-full bg-slate-900 border border-slate-700 rounded-sm px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">Skills <span className="text-slate-500 font-normal">(comma separated)</span></label>
-                      <input type="text" value={skillsInput} onChange={e => setSkillsInput(e.target.value)} placeholder="e.g. Python, SQL, Excel"
-                        className="w-full bg-slate-900 border border-slate-700 rounded-sm px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors" />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">Organisation name</label>
-                      <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Legal entity name" required
-                        className="w-full bg-slate-900 border border-slate-700 rounded-sm px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">Registration number</label>
-                      <input type="text" value={regNumber} onChange={e => setRegNumber(e.target.value)} placeholder="Company / CIPC number"
-                        className="w-full bg-slate-900 border border-slate-700 rounded-sm px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">Contact person</label>
-                      <input type="text" value={contactPerson} onChange={e => setContactPerson(e.target.value)} placeholder="Primary contact name"
-                        className="w-full bg-slate-900 border border-slate-700 rounded-sm px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">District</label>
-                      <select value={orgDistrict} onChange={e => setOrgDistrict(e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-sm px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
-                        <option value="">Select district</option>
-                        {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1.5">How will you use SkillsGrid?</label>
-                      <textarea value={useCase} onChange={e => setUseCase(e.target.value)} rows={2} placeholder="Brief description of your intended use…"
-                        className="w-full bg-slate-900 border border-slate-700 rounded-sm px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors resize-none" />
-                    </div>
-                    {selectedRole === "institution" && (
-                      <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-1.5">Institution type</label>
-                        <select value={institutionType} onChange={e => setInstitutionType(e.target.value)} required
-                          className="w-full bg-slate-900 border border-slate-700 rounded-sm px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
-                          <option value="">Select type</option>
-                          <option value="university">University</option>
-                          <option value="tvet">TVET College</option>
-                          <option value="training_body">Training Body</option>
-                        </select>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {error && <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-sm px-3 py-2">{error}</p>}
-
-                <button type="submit" disabled={loading}
-                  className="w-full py-2.5 rounded-sm text-sm font-semibold text-slate-900 mt-2 transition-opacity hover:opacity-90 disabled:opacity-50"
-                  style={{ background: "linear-gradient(90deg, #34d399, #22d3ee)" }}>
-                  {loading ? "Creating account…" : selectedRole === "learner" ? "Create Account" : "Submit for Verification"}
-                </button>
-              </motion.form>
+              </>
             )}
-          </AnimatePresence>
+
+
+            {/* Submit */}
+            <button
+              className="w-full py-2.5 rounded-sm text-sm font-semibold text-slate-900 mt-2 transition-opacity hover:opacity-90 active:opacity-80"
+              style={{ background: "linear-gradient(90deg, #34d399, #22d3ee)" }}
+            >
+              Create Account
+            </button>
+          </div>
 
           <p className="text-sm text-slate-400 text-center mt-6">
             Already have an account?{" "}
-            <Link href="/login" className="text-emerald-400 hover:text-emerald-300 font-medium">Sign in</Link>
+            <Link href="/login" className="text-emerald-400 hover:text-emerald-300 font-medium">
+              Sign in
+            </Link>
           </p>
         </div>
       </motion.div>
