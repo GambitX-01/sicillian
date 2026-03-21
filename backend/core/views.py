@@ -152,38 +152,58 @@ class OrganisationListView(generics.ListAPIView):
 
 class OrganisationDetailView(generics.RetrieveUpdateAPIView):
     queryset = OrganisationProfile.objects.all()
-    serializer_class = OrganisationProfileSerializer
-    permission_classes = [IsAuthenticated, IsActiveAccount, IsOwnerOrSETA]
+    from .models import User, OrganisationProfile, LearnerProfile, Opportunity, Application, Match, GapAlert
+    from .matching import run_matching_engine_for_learner
+
+    # ... (keep existing imports)
+
+    # ── LearnerProfiles ───────────────────────────────────────────────────────────
+
+    class LearnerProfileListCreate(generics.ListCreateAPIView):
+        queryset = LearnerProfile.objects.all()
+        serializer_class = LearnerProfileSerializer
+
+        def get_permissions(self):
+            if self.request.method == 'POST':
+                return [IsAuthenticated(), IsActiveAccount(), IsLearner()]
+            return [IsAuthenticated(), IsActiveAccount()]
+
+        def perform_create(self, serializer):
+            profile = serializer.save()
+            # Trigger matching for the new profile
+            run_matching_engine_for_learner(profile.id)
 
 
-# ── LearnerProfiles ───────────────────────────────────────────────────────────
+    class LearnerProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+        queryset = LearnerProfile.objects.all()
+        serializer_class = LearnerProfileSerializer
+        permission_classes = [IsAuthenticated, IsActiveAccount, IsOwnerOrSETA]
 
-class LearnerProfileListCreate(generics.ListCreateAPIView):
-    queryset = LearnerProfile.objects.all()
-    serializer_class = LearnerProfileSerializer
-
-    def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated(), IsActiveAccount(), IsLearner()]
-        return [IsAuthenticated(), IsActiveAccount()]
-
-
-class LearnerProfileDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = LearnerProfile.objects.all()
-    serializer_class = LearnerProfileSerializer
-    permission_classes = [IsAuthenticated, IsActiveAccount, IsOwnerOrSETA]
+        def perform_update(self, serializer):
+            profile = serializer.save()
+            # Recalculate matches when profile changes
+            run_matching_engine_for_learner(profile.id)
 
 
-# ── Opportunities ─────────────────────────────────────────────────────────────
+    # ── Opportunities ─────────────────────────────────────────────────────────────
 
-class OpportunityListCreate(generics.ListCreateAPIView):
-    queryset = Opportunity.objects.all()
-    serializer_class = OpportunitySerializer
+    class OpportunityListCreate(generics.ListCreateAPIView):
+        queryset = Opportunity.objects.all()
+        serializer_class = OpportunitySerializer
 
-    def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated(), IsActiveAccount(), IsEmployer()]
-        return [IsAuthenticated(), IsActiveAccount()]
+        def get_permissions(self):
+            if self.request.method == 'POST':
+                return [IsAuthenticated(), IsActiveAccount(), IsEmployer()]
+            return [IsAuthenticated(), IsActiveAccount()]
+
+        def perform_create(self, serializer):
+            opportunity = serializer.save()
+            # When a new opportunity is posted, trigger matching for ALL searching learners
+            # In a production environment, this should be a background task (e.g. Celery)
+            learners = LearnerProfile.objects.filter(status='searching')
+            for learner in learners:
+                run_matching_engine_for_learner(learner.id)
+
 
 
 class OpportunityDetail(generics.RetrieveUpdateDestroyAPIView):
