@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
-type Role = "learner" | "employer" | "institution" | "seta" | "incubator";
+type Role = "learner" | "employer" | "institution" | "seta" | "incubator" | "superadmin";
 
 interface NavItem {
   label: string;
