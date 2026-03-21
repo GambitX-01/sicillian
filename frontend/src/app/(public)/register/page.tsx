@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import type { LearnerRegisterData, OrgRegisterData } from "@/types";
+import type { LearnerRegisterData, OrgRegisterData, Race, Gender, Disability, Nationality } from "@/types";
 
 type RoleOption = { id: string; label: string; description: string; icon: LucideIcon };
 
@@ -71,6 +71,14 @@ export default function RegisterPage() {
   const [qualification, setQual]        = useState("");
   const [skillsRaw, setSkillsRaw]       = useState("");
 
+  // B-BBEE demographics
+  const [race, setRace]                 = useState<Race | "">("");
+  const [gender, setGender]             = useState<Gender | "">("");
+  const [disability, setDisability]     = useState<Disability | "">("");
+  const [nationality, setNationality]   = useState<Nationality | "">("");
+  const [dob, setDob]                   = useState("");
+  const [idNumber, setIdNumber]         = useState("");
+
   // Org-specific
   const [companyName, setCompanyName]   = useState("");
   const [regNumber, setRegNumber]       = useState("");
@@ -94,6 +102,12 @@ export default function RegisterPage() {
         const data: LearnerRegisterData = {
           email, password, first_name: name, phone,
           district, nqf_level: nqfLevel, qualification, skills,
+          race: race || null,
+          gender: gender || null,
+          disability: disability || null,
+          nationality: nationality || null,
+          date_of_birth: dob || null,
+          id_number: idNumber || null,
         };
         await registerLearner(data);
         // AuthContext redirects to /learner/matches on success
@@ -292,6 +306,88 @@ export default function RegisterPage() {
                         placeholder="e.g. Python, SQL, Excel" className={inputClass()} />
                     </div>
                     <p className="text-[11px] text-slate-600 mt-1">You can add more skills after registration.</p>
+                  </div>
+
+                  {/* B-BBEE / Demographics */}
+                  <div className="pt-2 border-t border-slate-700">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                      Demographics <span className="text-slate-600 font-normal normal-case tracking-normal">— for B-BBEE reporting (optional)</span>
+                    </p>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Race / Population group</Label>
+                          <div className="relative">
+                            <IconWrap><User size={16} /></IconWrap>
+                            <select value={race} onChange={e => setRace(e.target.value as Race | "")} className={selectClass()}>
+                              <option value="">Select</option>
+                              <option value="black_african">Black African</option>
+                              <option value="coloured">Coloured</option>
+                              <option value="indian">Indian</option>
+                              <option value="asian">Asian</option>
+                              <option value="white">White</option>
+                              <option value="other">Other</option>
+                              <option value="prefer_not_to_say">Prefer not to say</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Gender</Label>
+                          <div className="relative">
+                            <IconWrap><User size={16} /></IconWrap>
+                            <select value={gender} onChange={e => setGender(e.target.value as Gender | "")} className={selectClass()}>
+                              <option value="">Select</option>
+                              <option value="male">Male</option>
+                              <option value="female">Female</option>
+                              <option value="non_binary">Non-binary</option>
+                              <option value="prefer_not_to_say">Prefer not to say</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Disability</Label>
+                          <div className="relative">
+                            <IconWrap><ShieldCheck size={16} /></IconWrap>
+                            <select value={disability} onChange={e => setDisability(e.target.value as Disability | "")} className={selectClass()}>
+                              <option value="">Select</option>
+                              <option value="no">No</option>
+                              <option value="yes">Yes</option>
+                              <option value="prefer_not_to_say">Prefer not to say</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Nationality</Label>
+                          <div className="relative">
+                            <IconWrap><MapPin size={16} /></IconWrap>
+                            <select value={nationality} onChange={e => setNationality(e.target.value as Nationality | "")} className={selectClass()}>
+                              <option value="">Select</option>
+                              <option value="south_african">South African</option>
+                              <option value="permanent_resident">Permanent Resident</option>
+                              <option value="refugee_permit">Refugee / Asylum Permit</option>
+                              <option value="other">Other</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Date of birth</Label>
+                          <input type="date" value={dob} onChange={e => setDob(e.target.value)}
+                            className="w-full bg-slate-900 border border-slate-700 rounded-sm px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400 transition-colors" />
+                        </div>
+                        <div>
+                          <Label>SA ID number <span className="text-slate-600 font-normal">(optional)</span></Label>
+                          <input type="text" value={idNumber} onChange={e => setIdNumber(e.target.value)}
+                            placeholder="13-digit ID" maxLength={13}
+                            className="w-full bg-slate-900 border border-slate-700 rounded-sm px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
               )}
